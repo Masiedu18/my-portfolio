@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Calculator | Asiedu Messiah</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2c3e50;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .calculator {
+            background: var(--secondary);
+            border-radius: 15px;
+            padding: 25px;
+            width: 320px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .calculator:hover {
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+        }
+        
+        #display {
+            width: calc(100% - 20px);
+            height: 60px;
+            margin-bottom: 15px;
+            font-size: 28px;
+            text-align: right;
+            padding: 10px;
+            background: rgba(236, 240, 241, 0.9);
+            border: none;
+            border-radius: 8px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        #display:focus {
+            outline: none;
+            background: var(--light);
+        }
+        
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        
+        button {
+            height: 55px;
+            font-size: 20px;
+            font-weight: 500;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: var(--primary);
+            color: white;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            opacity: 0.9;
+        }
+        
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+        }
+        
+        .equals {
+            background: var(--success);
+            grid-column: span 2;
+        }
+        
+        .clear {
+            background: var(--danger);
+        }
+        
+        .operator {
+            background: var(--warning);
+        }
+        
+        .function {
+            background: #9b59b6;
+        }
+        
+        .history-btn {
+            background: #34495e;
+            font-size: 16px;
+        }
+        
+        .history-panel {
+            display: none;
+            position: absolute;
+            right: -250px;
+            top: 0;
+            width: 230px;
+            height: 100%;
+            background: white;
+            padding: 15px;
+            border-radius: 0 15px 15px 0;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+        
+        .history-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+        
+        .history-item:hover {
+            background: #f5f5f5;
+        }
+        
+        .calculator-container {
+            position: relative;
+        }
+        
+        .theme-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: var(--light);
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        /* Dark theme */
+        .dark-theme {
+            --primary: #2980b9;
+            --secondary: #1a1a1a;
+            --light: #333;
+            --dark: #f8f9fa;
+            background: linear-gradient(135deg, #2c3e50 0%, #1a1a1a 100%);
+        }
+        
+        .dark-theme .calculator {
+            background: var(--secondary);
+        }
+        
+        .dark-theme #display {
+            background: #444;
+            color: white;
+        }
+        
+        .dark-theme .history-panel {
+            background: #333;
+            color: white;
+        }
+        
+        .dark-theme .history-item:hover {
+            background: #444;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+        <div class="calculator">
+            <input type="text" id="display" readonly>
+            <div class="buttons">
+                <button class="function" onclick="calculateSquareRoot()">√</button>
+                <button class="function" onclick="calculatePower()">x²</button>
+                <button class="function" onclick="calculatePercentage()">%</button>
+                <button class="clear" onclick="clearDisplay()">C</button>
+                
+                <button onclick="appendToDisplay('7')">7</button>
+                <button onclick="appendToDisplay('8')">8</button>
+                <button onclick="appendToDisplay('9')">9</button>
+                <button class="operator" onclick="appendToDisplay('/')">/</button>
+                
+                <button onclick="appendToDisplay('4')">4</button>
+                <button onclick="appendToDisplay('5')">5</button>
+                <button onclick="appendToDisplay('6')">6</button>
+                <button class="operator" onclick="appendToDisplay('*')">×</button>
+                
+                <button onclick="appendToDisplay('1')">1</button>
+                <button onclick="appendToDisplay('2')">2</button>
+                <button onclick="appendToDisplay('3')">3</button>
+                <button class="operator" onclick="appendToDisplay('-')">-</button>
+                
+                <button onclick="appendToDisplay('0')">0</button>
+                <button onclick="appendToDisplay('.')">.</button>
+                <button class="equals" onclick="calculate()">=</button>
+                <button class="operator" onclick="appendToDisplay('+')">+</button>
+                
+                <button class="history-btn" onclick="toggleHistory()">History</button>
+                <button class="function" onclick="backspace()">⌫</button>
+                <button class="function" onclick="appendToDisplay('(')">(</button>
+                <button class="function" onclick="appendToDisplay(')')">)</button>
+            </div>
+        </div>
+        
+        <div class="history-panel" id="historyPanel">
+            <h3>Calculation History</h3>
+            <div id="historyList"></div>
+        </div>
+    </div>
+
+    <script>
+        let calculationHistory = [];
+        let isDarkTheme = false;
+        
+        function appendToDisplay(value) {
+            const display = document.getElementById('display');
+            
+            // Prevent multiple decimals in a number
+            if (value === '.' && display.value.includes('.') && 
+                !display.value.split(/[\+\-\*\/]/).pop().includes('.')) {
+                return;
+            }
+            
+            // Prevent operators at the start (except minus for negative numbers)
+            if (['+', '*', '/'].includes(value) && display.value === '') {
+                return;
+            }
+            
+            // Handle negative numbers
+            if (value === '-' && display.value === '') {
+                display.value = '-';
+                return;
+            }
+            
+            // Prevent multiple consecutive operators
+            const lastChar = display.value.slice(-1);
+            if (['+', '-', '*', '/'].includes(lastChar) && 
+                ['+', '-', '*', '/'].includes(value)) {
+                display.value = display.value.slice(0, -1) + value;
+                return;
+            }
+            
+            display.value += value;
+        }
+        
+        function clearDisplay() {
+            document.getElementById('display').value = '';
+        }
+        
+        function backspace() {
+            const display = document.getElementById('display');
+            display.value = display.value.slice(0, -1);
+        }
+        
+        function calculate() {
+            const display = document.getElementById('display');
+            let expression = display.value;
+            
+            try {
+                // Replace × with * for proper evaluation
+                expression = expression.replace(/×/g, '*');
+                
+                // Validate expression
+                if (!isValidExpression(expression)) {
+                    throw new Error('Invalid expression');
+                }
+                
+                // Calculate result
+                const result = eval(expression);
+                
+                // Check if result is finite
+                if (!isFinite(result)) {
+                    throw new Error('Result is not finite');
+                }
+                
+                // Add to history
+                addToHistory(expression, result);
+                
+                // Display result
+                display.value = result;
+            } catch (error) {
+                display.value = 'Error';
+                setTimeout(() => {
+                    if (display.value === 'Error') {
+                        clearDisplay();
+                    }
+                }, 1000);
+            }
+        }
+        
+        function isValidExpression(expr) {
+            // Check for balanced parentheses
+            const stack = [];
+            for (let char of expr) {
+                if (char === '(') {
+                    stack.push(char);
+                } else if (char === ')') {
+                    if (stack.length === 0) return false;
+                    stack.pop();
+                }
+            }
+            if (stack.length !== 0) return false;
+            
+            // Check for valid characters
+            if (!/^[\d+\-*\/%.()\s]+$/.test(expr)) {
+                return false;
+            }
+            
+            return true;
+        }
+        
+        function addToHistory(expression, result) {
+            const historyItem = {
+                expression,
+                result,
+                timestamp: new Date().toLocaleTimeString()
+            };
+            
+            calculationHistory.unshift(historyItem);
+            updateHistoryDisplay();
+            
+            // Keep only the last 10 calculations
+            if (calculationHistory.length > 10) {
+                calculationHistory.pop();
+            }
+        }
+        
+        function updateHistoryDisplay() {
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
+            
+            calculationHistory.forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.innerHTML = `
+                    <div><strong>${item.expression}</strong></div>
+                    <div>= ${item.result}</div>
+                    <small>${item.timestamp}</small>
+                `;
+                
+                historyItem.addEventListener('click', () => {
+                    document.getElementById('display').value = item.expression;
+                });
+                
+                historyList.appendChild(historyItem);
+            });
+        }
+        
+        function toggleHistory() {
+            const historyPanel = document.getElementById('historyPanel');
+            historyPanel.style.display = historyPanel.style.display === 'block' ? 'none' : 'block';
+        }
+        
+        function calculateSquareRoot() {
+            const display = document.getElementById('display');
+            try {
+                const value = parseFloat(display.value);
+                if (value < 0) {
+                    display.value = 'Error';
+                } else {
+                    const result = Math.sqrt(value);
+                    addToHistory(`√(${value})`, result);
+                    display.value = result;
+                }
+            } catch {
+                display.value = 'Error';
+            }
+        }
+        
+        function calculatePower() {
+            const display = document.getElementById('display');
+            try {
+                const value = parseFloat(display.value);
+                const result = Math.pow(value, 2);
+                addToHistory(`(${value})²`, result);
+                display.value = result;
+            } catch {
+                display.value = 'Error';
+            }
+        }
+        
+        function calculatePercentage() {
+            const display = document.getElementById('display');
+            try {
+                const value = parseFloat(display.value);
+                const result = value / 100;
+                addToHistory(`${value}%`, result);
+                display.value = result;
+            } catch {
+                display.value = 'Error';
+            }
+        }
+        
+        function toggleTheme() {
+            isDarkTheme = !isDarkTheme;
+            document.body.classList.toggle('dark-theme', isDarkTheme);
+        }
+        
+        // Keyboard support
+        document.addEventListener('keydown', (event) => {
+            const key = event.key;
+            
+            if (/[0-9]/.test(key)) {
+                appendToDisplay(key);
+            } else if (['+', '-', '*', '/', '(', ')', '.'].includes(key)) {
+                appendToDisplay(key);
+            } else if (key === 'Enter') {
+                calculate();
+            } else if (key === 'Escape') {
+                clearDisplay();
+            } else if (key === 'Backspace') {
+                backspace();
+            } else if (key === '%') {
+                calculatePercentage();
+            }
+        });
+    </script>
+</body>
+</html>

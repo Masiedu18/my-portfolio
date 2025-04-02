@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced AI Chat | Asiedu Messiah</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0084ff;
+            --primary-dark: #0066cc;
+            --secondary: #f0f2f5;
+            --text-primary: #050505;
+            --text-secondary: #65676b;
+            --background: #ffffff;
+            --background-secondary: #f0f2f5;
+            --border: #dddfe2;
+            --message-received: #e4e6eb;
+            --message-sent: #0084ff;
+            --ai-message: #f0f7ff;
+            --online: #31a24c;
+            --typing: #65676b;
+            --warning: #ff9500;
+            --error: #ff3b30;
+            --info: #5ac8fa;
+            --success: #34c759;
+        }
+
+        .dark-mode {
+            --primary: #0084ff;
+            --primary-dark: #0066cc;
+            --secondary: #242526;
+            --text-primary: #e4e6eb;
+            --text-secondary: #b0b3b8;
+            --background: #18191a;
+            --background-secondary: #242526;
+            --border: #3e4042;
+            --message-received: #3e4042;
+            --message-sent: #0084ff;
+            --ai-message: #1f2a38;
+            --online: #31a24c;
+            --typing: #b0b3b8;
+            --warning: #ff9500;
+            --error: #ff3b30;
+            --info: #5ac8fa;
+            --success: #34c759;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: var(--background-secondary);
+            color: var(--text-primary);
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 900px;
+            height: 90vh;
+            background: var(--background);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: background 0.3s;
+            position: relative;
+        }
+
+        .chat-header {
+            background: var(--secondary);
+            color: var(--text-primary);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .online-status {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 10px;
+            height: 10px;
+            background: var(--online);
+            border-radius: 50%;
+            border: 2px solid var(--secondary);
+        }
+
+        .user-info h3 {
+            font-size: 16px;
+            margin-bottom: 2px;
+        }
+
+        .user-info p {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .header-right {
+            display: flex;
+            gap: 15px;
+        }
+
+        .header-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 16px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .header-btn:hover {
+            color: var(--primary);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--background);
+            transition: background 0.3s;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            line-height: 1.4;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .received {
+            background: var(--message-received);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+            color: var(--text-primary);
+        }
+
+        .sent {
+            background: var(--message-sent);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .ai {
+            background: var(--ai-message);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .message-time {
+            font-size: 10px;
+            color: rgba(255,255,255,0.7);
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        .received .message-time,
+        .ai .message-time {
+            color: var(--text-secondary);
+        }
+
+        .message-status {
+            position: absolute;
+            right: 5px;
+            bottom: 5px;
+            font-size: 12px;
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 10px 15px;
+            background: var(--message-received);
+            border-radius: 18px;
+            align-self: flex-start;
+            margin-bottom: 15px;
+            color: var(--typing);
+            font-size: 14px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 3px;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--typing);
+            border-radius: 50%;
+            animation: typingAnimation 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingAnimation {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+
+        .chat-input-container {
+            padding: 10px 15px;
+            border-top: 1px solid var(--border);
+            background: var(--secondary);
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        .input-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .tool-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 18px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .tool-btn:hover {
+            color: var(--primary);
+        }
+
+        .tool-btn.active {
+            color: var(--primary);
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #message-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 20px;
+            outline: none;
+            background: var(--background);
+            color: var(--text-primary);
+            font-size: 14px;
+            resize: none;
+            max-height: 120px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        #send-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #send-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .ai-assistant-btn {
+            position: absolute;
+            bottom: 70px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        .smart-replies {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .smart-reply {
+            background: var(--message-received);
+            color: var(--text-primary);
+            border: none;
+            border-radius: 15px;
+            padding: 8px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .smart-reply:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .sentiment-indicator {
+            font-size: 12px;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .positive {
+            color: var(--primary);
+        }
+
+        .neutral {
+            color: var(--text-secondary);
+        }
+
+        .negative {
+            color: var(--error);
+        }
+
+        .ai-tools {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .ai-tool {
+            background: var(--ai-message);
+            color: var(--text-primary);
+            border: none;
+            border-radius: 15px;
+            padding: 6px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .ai-tool:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--secondary);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transition: background 0.3s;
+        }
+
+        /* Knowledge base styles */
+        .knowledge-card {
+            background: var(--background);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 10px 0;
+            border-left: 3px solid var(--info);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .knowledge-card h4 {
+            margin-bottom: 8px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .knowledge-card p {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .knowledge-card .source {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        /* Code block styles */
+        pre {
+            background: var(--secondary);
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            margin: 10px 0;
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            background: var(--secondary);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+
+        /* Table styles */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--secondary);
+        }
+
+        /* List styles */
+        .ai ul, .ai ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .ai li {
+            margin-bottom: 5px;
+        }
+
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .action-btn {
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .primary-action {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        .secondary-action {
+            background: var(--secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        /* Loading animation */
+        .loading-animation {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,132,255,0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            .ai-assistant-btn {
+                bottom: 60px;
+                right: 10px;
+                width: 45px;
+                height: 45px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" id="theme-toggle">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="header-left">
+                <div class="user-avatar">
+                    AI
+                    <div class="online-status"></div>
+                </div>
+                <div class="user-info">
+                    <h3>Advanced AI Assistant</h3>
+                    <p id="user-status">Online</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="header-btn" id="new-chat-btn" title="New Chat">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button class="header-btn" id="ai-settings-btn" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chat-messages">
+            <!-- Messages will appear here -->
+            <div class="message ai">
+                <strong>Advanced AI Assistant</strong><br>
+                Hello! I'm your advanced AI assistant. I can help with a wide range of topics including:
+                <ul>
+                    <li>Answering complex questions</li>
+                    <li>Explaining concepts in detail</li>
+                    <li>Providing code examples</li>
+                    <li>Analyzing data and information</li>
+                    <li>Generating creative content</li>
+                </ul>
+                How can I assist you today?
+                <div class="ai-tools">
+                    <button class="ai-tool" data-prompt="Explain quantum computing in simple terms">
+                        <i class="fas fa-atom"></i> Quantum Computing
+                    </button>
+                    <button class="ai-tool" data-prompt="Show me a Python example for a REST API">
+                        <i class="fas fa-code"></i> Python Example
+                    </button>
+                    <button class="ai-tool" data-prompt="Help me understand machine learning">
+                        <i class="fas fa-brain"></i> Machine Learning
+                    </button>
+                </div>
+                <div class="message-time">Just now</div>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <div class="smart-replies" id="smart-replies">
+                <!-- Smart replies will appear here -->
+            </div>
+            <div class="input-toolbar">
+                <button class="tool-btn" id="ai-suggest-btn" title="Get suggestions">
+                    <i class="fas fa-lightbulb"></i>
+                </button>
+                <button class="tool-btn" id="voice-btn" title="Voice input">
+                    <i class="fas fa-microphone"></i>
+                </button>
+            </div>
+            
+            <div class="chat-input-wrapper">
+                <textarea id="message-input" placeholder="Ask me anything or describe what you need help with..." rows="1"></textarea>
+                <button id="send-btn" title="Send message">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+
+        <button class="ai-assistant-btn" id="ai-assistant-btn" title="AI Assistance">
+            <i class="fas fa-robot"></i>
+        </button>
+    </div>
+
+    <script>
+        // DOM Elements
+        const chatMessages = document.getElementById('chat-messages');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const smartReplies = document.getElementById('smart-replies');
+        const aiSuggestBtn = document.getElementById('ai-suggest-btn');
+        const voiceBtn = document.getElementById('voice-btn');
+        const aiAssistantBtn = document.getElementById('ai-assistant-btn');
+        const themeToggle = document.getElementById('theme-toggle');
+        const newChatBtn = document.getElementById('new-chat-btn');
+        const body = document.body;
+
+        // AI Configuration
+        const aiConfig = {
+            name: "Advanced AI Assistant",
+            personality: "knowledgeable and helpful",
+            capabilities: [
+                "Answer complex questions",
+                "Explain technical concepts",
+                "Provide code examples",
+                "Analyze and interpret data",
+                "Generate creative content",
+                "Solve mathematical problems",
+                "Translate between languages",
+                "Summarize long documents"
+            ],
+            responseDelay: 1000 + Math.random() * 2000,
+            knowledgeBase: {
+                "quantum computing": {
+                    summary: "Quantum computing uses quantum-mechanical phenomena to perform calculations.",
+                    details: "Unlike classical computers that use bits (0s and 1s), quantum computers use quantum bits or qubits which can exist in superposition states. This allows them to solve certain problems much faster than classical computers.",
+                    examples: ["Shor's algorithm for factoring", "Grover's algorithm for database search"],
+                    sources: ["Wikipedia: Quantum computing", "IBM Quantum Experience"]
+                },
+                "machine learning": {
+                    summary: "Machine learning is a subset of AI that enables systems to learn from data.",
+                    details: "Instead of being explicitly programmed, ML algorithms build mathematical models based on sample data (training data) to make predictions or decisions. Common types include supervised learning, unsupervised learning, and reinforcement learning.",
+                    examples: ["Image recognition", "Natural language processing", "Predictive analytics"],
+                    sources: ["Andrew Ng's ML course", "Scikit-learn documentation"]
+                },
+                "python programming": {
+                    summary: "Python is a high-level, interpreted programming language.",
+                    details: "Known for its readability and versatility, Python supports multiple programming paradigms including procedural, object-oriented, and functional programming. It has extensive libraries for various applications like web development, data analysis, AI, and more.",
+                    examples: ["Web frameworks: Django, Flask", "Data science: Pandas, NumPy", "ML: TensorFlow, PyTorch"],
+                    sources: ["Python.org", "Real Python tutorials"]
+                }
+            }
+        };
+
+        // Conversation memory
+        let conversationMemory = [];
+        let currentContext = "general";
+
+        // Sample smart replies based on context
+        const smartReplyLibrary = {
+            general: [
+                "What can you do?",
+                "Explain quantum computing",
+                "Show me a Python example",
+                "Help with machine learning"
+            ],
+            technical: [
+                "Explain in simpler terms",
+                "Give me a code example",
+                "What are the applications?",
+                "Compare with alternatives"
+            ],
+            creative: [
+                "Suggest a story idea",
+                "Help me write a poem",
+                "Generate a business name",
+                "Create a marketing slogan"
+            ]
+        };
+
+        // Initialize the chat
+        function initChat() {
+            // Load initial AI message
+            addAIMessage(getWelcomeMessage(), getWelcomeTools());
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Load any saved conversation
+            loadConversation();
+        }
+
+        // Setup all event listeners
+        function setupEventListeners() {
+            // Send message on button click or Enter key
+            sendBtn.addEventListener('click', sendMessage);
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // Auto-resize textarea
+            messageInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+
+            // AI suggestion button
+            aiSuggestBtn.addEventListener('click', generateSmartReplies);
+
+            // AI assistant button
+            aiAssistantBtn.addEventListener('click', showAssistantOptions);
+
+            // Smart reply click handler
+            smartReplies.addEventListener('click', (e) => {
+                if (e.target.classList.contains('smart-reply')) {
+                    messageInput.value = e.target.textContent;
+                    messageInput.focus();
+                }
+            });
+
+            // AI tool click handler
+            chatMessages.addEventListener('click', (e) => {
+                if (e.target.classList.contains('ai-tool')) {
+                    const prompt = e.target.getAttribute('data-prompt');
+                    messageInput.value = prompt;
+                    messageInput.focus();
+                }
+            });
+
+            // Theme toggle
+            themeToggle.addEventListener('click', toggleDarkMode);
+
+            // New chat button
+            newChatBtn.addEventListener('click', startNewChat);
+
+            // Voice button (placeholder for speech recognition)
+            voiceBtn.addEventListener('click', () => {
+                addUserMessage("[Voice message]", true);
+                simulateAIResponse("I heard your voice message! (Note: This is a simulation. Real voice recognition would require browser permissions.)");
+            });
+        }
+
+        // Get welcome message based on time of day
+        function getWelcomeMessage() {
+            const hour = new Date().getHours();
+            let greeting = "Hello";
+            
+            if (hour < 12) greeting = "Good morning";
+            else if (hour < 18) greeting = "Good afternoon";
+            else greeting = "Good evening";
+            
+            return `${greeting}! I'm your advanced AI assistant. I can help with a wide range of topics including:
+                <ul>
+                    <li>Answering complex questions</li>
+                    <li>Explaining concepts in detail</li>
+                    <li>Providing code examples</li>
+                    <li>Analyzing data and information</li>
+                    <li>Generating creative content</li>
+                </ul>
+                How can I assist you today?`;
+        }
+
+        // Get welcome tools
+        function getWelcomeTools() {
+            return [
+                { text: "Explain quantum computing in simple terms", icon: "atom" },
+                { text: "Show me a Python example for a REST API", icon: "code" },
+                { text: "Help me understand machine learning", icon: "brain" },
+                { text: "Generate a creative writing prompt", icon: "pen-fancy" }
+            ];
+        }
+
+        // Add user message to chat
+        function addUserMessage(text, isVoice = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', 'sent');
+            
+            if (isVoice) {
+                messageDiv.innerHTML = `
+                    <i class="fas fa-microphone"></i> Voice message
+                    <div class="message-time">${getCurrentTime()}</div>
+                    <div class="message-status">
+                        <i class="fas fa-check-double"></i>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    ${text}
+                    <div class="message-time">${getCurrentTime()}</div>
+                    <div class="message-status">
+                        <i class="fas fa-check-double"></i>
+                    </div>
+                `;
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Add to conversation memory
+            conversationMemory.push({
+                type: 'user',
+                content: text,
+                timestamp: new Date().toISOString()
+            });
+
+            // Save conversation
+            saveConversation();
+
+            // Analyze sentiment of the message
+            if (!isVoice) {
+                const sentiment = analyzeSentiment(text);
+                showSentimentIndicator(sentiment);
+                
+                // Update context based on message content
+                updateContext(text);
+            }
+        }
+
+        // Add AI message to chat
+        function addAIMessage(text, tools = []) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', 'ai');
+            
+            let toolsHTML = '';
+            if (tools.length > 0) {
+                toolsHTML = `<div class="ai-tools">${tools.map(tool => `
+                    <button class="ai-tool" data-prompt="${tool.text}">
+                        <i class="fas fa-${tool.icon}"></i> ${tool.text}
+                    </button>
+                `).join('')}</div>`;
+            }
+            
+            messageDiv.innerHTML = `
+                <strong>${aiConfig.name}</strong><br>
+                ${text}
+                ${toolsHTML}
+                <div class="message-time">${getCurrentTime()}</div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Add to conversation memory
+            conversationMemory.push({
+                type: 'ai',
+                content: text,
+                timestamp: new Date().toISOString()
+            });
+
+            // Save conversation
+            saveConversation();
+        }
+
+        // Show sentiment indicator
+        function showSentimentIndicator(sentiment) {
+            const indicator = document.createElement('div');
+            indicator.className = `sentiment-indicator ${sentiment.score > 0 ? 'positive' : sentiment.score < 0 ? 'negative' : 'neutral'}`;
+            
+            let icon = 'meh';
+            if (sentiment.score > 0.3) icon = 'smile';
+            if (sentiment.score < -0.3) icon = 'frown';
+            
+            indicator.innerHTML = `
+                <i class="fas fa-${icon}"></i>
+                <span>${sentiment.label}</span>
+            `;
+            
+            // Find the last sent message and append the indicator
+            const sentMessages = document.querySelectorAll('.message.sent');
+            if (sentMessages.length > 0) {
+                sentMessages[sentMessages.length - 1].appendChild(indicator);
+            }
+        }
+
+        // Simple sentiment analysis
+        function analyzeSentiment(text) {
+            const positiveWords = ['happy', 'great', 'awesome', 'wonderful', 'love', 'like', 'good', 'excellent', 'thanks', 'thank you', 'helpful', 'perfect'];
+            const negativeWords = ['sad', 'bad', 'terrible', 'hate', 'awful', 'worst', 'angry', 'upset', 'frustrated', 'disappointed', 'useless'];
+            
+            const words = text.toLowerCase().split(/\s+/);
+            let score = 0;
+            
+            words.forEach(word => {
+                if (positiveWords.includes(word)) score += 1;
+                if (negativeWords.includes(word)) score -= 1;
+            });
+            
+            // Normalize score
+            score = Math.max(-1, Math.min(1, score / 5));
+            
+            let label = 'Neutral';
+            if (score > 0.3) label = 'Positive';
+            else if (score < -0.3) label = 'Negative';
+            
+            return { score, label };
+        }
+
+        // Update conversation context based on message
+        function updateContext(message) {
+            const lowerMsg = message.toLowerCase();
+            
+            if (lowerMsg.includes('quantum') || lowerMsg.includes('physics') || 
+                lowerMsg.includes('algorithm') || lowerMsg.includes('code') || 
+                lowerMsg.includes('program')) {
+                currentContext = "technical";
+            } 
+            else if (lowerMsg.includes('story') || lowerMsg.includes('poem') || 
+                     lowerMsg.includes('creative') || lowerMsg.includes('write') || 
+                     lowerMsg.includes('generate')) {
+                currentContext = "creative";
+            }
+            else {
+                currentContext = "general";
+            }
+        }
+
+        // Generate smart reply suggestions based on context
+        function generateSmartReplies() {
+            // Clear existing replies
+            smartReplies.innerHTML = '';
+            
+            // Get replies for current context
+            const replies = smartReplyLibrary[currentContext]
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 4);
+            
+            // Add to DOM
+            replies.forEach(reply => {
+                const btn = document.createElement('button');
+                btn.className = 'smart-reply';
+                btn.textContent = reply;
+                smartReplies.appendChild(btn);
+            });
+        }
+
+        // Show AI assistant options
+        function showAssistantOptions() {
+            addAIMessage("I can help with specialized tasks. What would you like me to do?", [
+                { text: "Explain a technical concept", icon: "microscope" },
+                { text: "Generate creative content", icon: "pen-fancy" },
+                { text: "Solve a math problem", icon: "calculator" },
+                { text: "Analyze some data", icon: "chart-bar" }
+            ]);
+        }
+
+        // Get current time in HH:MM AM/PM format
+        function getCurrentTime() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            return `${hours}:${minutes} ${ampm}`;
+        }
+
+        // Simulate AI response
+        function simulateAIResponse(userMessage) {
+            // Show typing indicator
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'typing-indicator';
+            typingIndicator.innerHTML = `
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+                <span>${aiConfig.name} is typing...</span>
+            `;
+            chatMessages.appendChild(typingIndicator);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Generate response after delay
+            setTimeout(() => {
+                // Remove typing indicator
+                typingIndicator.remove();
+                
+                // Generate response based on user input
+                const response = generateAIResponse(userMessage);
+                
+                // Add AI response with appropriate tools
+                const tools = getResponseTools(response, userMessage);
+                addAIMessage(response, tools);
+                
+                // Generate new smart replies based on context
+                generateSmartReplies();
+            }, aiConfig.responseDelay);
+        }
+
+        // Generate AI response based on user input
+        function generateAIResponse(userMessage) {
+            const lowerMsg = userMessage.toLowerCase();
+            
+            // Check if this is a knowledge base topic
+            for (const [topic, info] of Object.entries(aiConfig.knowledgeBase)) {
+                if (lowerMsg.includes(topic)) {
+                    return formatKnowledgeResponse(topic, info);
+                }
+            }
+            
+            // Technical questions
+            if (lowerMsg.includes('quantum')) {
+                return `Quantum computing is an advanced computing paradigm that uses quantum-mechanical phenomena like superposition and entanglement to perform calculations. Here's a brief explanation:
+                
+                <div class="knowledge-card">
+                    <h4><i class="fas fa-atom"></i> Quantum Computing Basics</h4>
+                    <p>Unlike classical computers that use bits (which can be 0 or 1), quantum computers use quantum bits or qubits that can exist in a superposition of states. This allows quantum computers to process exponentially more information than classical computers for certain problems.</p>
+                    <p>Key concepts include:</p>
+                    <ul>
+                        <li><strong>Superposition:</strong> Qubits can be 0, 1, or any quantum superposition of these states</li>
+                        <li><strong>Entanglement:</strong> Qubits can be correlated with each other in non-classical ways</li>
+                        <li><strong>Quantum gates:</strong> Operations that manipulate qubit states</li>
+                    </ul>
+                    <p class="source">Source: IBM Quantum Computing Documentation</p>
+                </div>`;
+            }
+            
+            if (lowerMsg.includes('python') || lowerMsg.includes('code')) {
+                if (lowerMsg.includes('rest api') || lowerMsg.includes('api')) {
+                    return `Here's a simple Python example for creating a REST API using Flask:
+                    
+                    <pre><code>from flask import Flask, jsonify, request
+
+app = Flask(__name__)
+
+# Sample data
+tasks = [
+    {'id': 1, 'title': 'Learn Python', 'done': False},
+    {'id': 2, 'title': 'Build an API', 'done': False}
+]
+
+@app.route('/tasks', methods=['GET'])
+def get_tasks():
+    return jsonify({'tasks': tasks})
+
+@app.route('/tasks', methods=['POST'])
+def create_task():
+    if not request.json or not 'title' in request.json:
+        return jsonify({'error': 'Bad request'}), 400
+    
+    task = {
+        'id': tasks[-1]['id'] + 1,
+        'title': request.json['title'],
+        'done': False
+    }
+    tasks.append(task)
+    return jsonify({'task': task}), 201
+
+if __name__ == '__main__':
+    app.run(debug=True)</code></pre>
+                    
+                    This creates a simple task manager API with two endpoints:
+                    <ul>
+                        <li><code>GET /tasks</code> - Retrieve all tasks</li>
+                        <li><code>POST /tasks</code> - Create a new task</li>
+                    </ul>`;
+                }
+                return `Python is a versatile programming language. Here are some key features:
+                <ul>
+                    <li><strong>Easy to learn:</strong> Clean syntax and readability</li>
+                    <li><strong>Extensive libraries:</strong> For web development, data science, AI, etc.</li>
+                    <li><strong>Cross-platform:</strong> Runs on Windows, Mac, Linux</li>
+                </ul>
+                
+                Would you like a specific code example?`;
+            }
+            
+            if (lowerMsg.includes('machine learning') || lowerMsg.includes('ml') || lowerMsg.includes('ai')) {
+                return `Machine learning is a fascinating field! Here's an overview:
+                
+                <div class="knowledge-card">
+                    <h4><i class="fas fa-brain"></i> Machine Learning Basics</h4>
+                    <p>Machine learning is a method of data analysis that automates analytical model building. It's a branch of artificial intelligence based on the idea that systems can learn from data, identify patterns and make decisions with minimal human intervention.</p>
+                    
+                    <p><strong>Main Types:</strong></p>
+                    <table>
+                        <tr>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>Examples</th>
+                        </tr>
+                        <tr>
+                            <td>Supervised Learning</td>
+                            <td>Learns from labeled training data</td>
+                            <td>Classification, Regression</td>
+                        </tr>
+                        <tr>
+                            <td>Unsupervised Learning</td>
+                            <td>Finds patterns in unlabeled data</td>
+                            <td>Clustering, Dimensionality reduction</td>
+                        </tr>
+                        <tr>
+                            <td>Reinforcement Learning</td>
+                            <td>Learns by interacting with environment</td>
+                            <td>Game playing, Robotics</td>
+                        </tr>
+                    </table>
+                    <p class="source">Source: Stanford Machine Learning Course</p>
+                </div>`;
+            }
+            
+            // Math problems
+            if (lowerMsg.includes('solve') || lowerMsg.includes('math') || lowerMsg.includes('calculate')) {
+                const mathProblem = extractMathProblem(userMessage);
+                if (mathProblem) {
+                    return solveMathProblem(mathProblem);
+                }
+            }
+            
+            // Creative requests
+            if (lowerMsg.includes('story') || lowerMsg.includes('poem') || lowerMsg.includes('creative')) {
+                return generateCreativeContent(userMessage);
+            }
+            
+            // Default responses
+            if (lowerMsg.includes('hello') || lowerMsg.includes('hi') || lowerMsg.includes('hey')) {
+                return `Hello there! How can I assist you today? I can help with technical explanations, creative writing, problem solving, and more.`;
+            }
+            
+            if (lowerMsg.includes('thank')) {
+                return `You're welcome! I'm happy to help. Is there anything else you'd like to know or discuss?`;
+            }
+            
+            if (lowerMsg.includes('help') || lowerMsg.includes('what can you do')) {
+                return `I'm an advanced AI assistant capable of helping with many tasks. Here are some examples:
+                <ul>
+                    <li><strong>Technical explanations:</strong> Quantum computing, machine learning, programming concepts</li>
+                    <li><strong>Code examples:</strong> Python, JavaScript, algorithms</li>
+                    <li><strong>Problem solving:</strong> Math, logic puzzles, data analysis</li>
+                    <li><strong>Creative writing:</strong> Stories, poems, content generation</li>
+                    <li><strong>Learning assistance:</strong> Concept explanations, study guides</li>
+                </ul>
+                What would you like help with specifically?`;
+            }
+            
+            // If we don't recognize the query
+            return `I'm not entirely sure I understand your question. Could you please rephrase or provide more details? 
+            I'm happy to help with technical topics, creative writing, problem solving, and more.`;
+        }
+
+        // Format knowledge base response
+        function formatKnowledgeResponse(topic, info) {
+            return `
+                <div class="knowledge-card">
+                    <h4><i class="fas fa-info-circle"></i> ${topic.charAt(0).toUpperCase() + topic.slice(1)}</h4>
+                    <p><strong>Summary:</strong> ${info.summary}</p>
+                    <p><strong>Details:</strong> ${info.details}</p>
+                    ${info.examples ? `<p><strong>Examples:</strong> ${info.examples.join(', ')}</p>` : ''}
+                    ${info.sources ? `<p class="source">Sources: ${info.sources.join(', ')}</p>` : ''}
+                </div>
+                
+                Would you like more detailed information about any specific aspect of ${topic}?
+            `;
+        }
+
+        // Extract math problem from message
+        function extractMathProblem(message) {
+            // Simple pattern matching for common math problems
+            const patterns = [
+                /(?:solve|calculate|what is|how much is)\s+([\d\s\+\-\*\/\^\(\)\.]+)/i,
+                /(?:solve|calculate)\s+(?:the )?(?:equation|expression)\s+([\d\s\+\-\*\/\^\(\)\.=]+)/i
+            ];
+            
+            for (const pattern of patterns) {
+                const match = message.match(pattern);
+                if (match) {
+                    return match[1].trim();
+                }
+            }
+            return null;
+        }
+
+        // Solve simple math problems
+        function solveMathProblem(problem) {
+            try {
+                // Basic safety check
+                if (problem.includes(';') || problem.includes('[') || problem.includes(']') || 
+                    problem.includes('{') || problem.includes('}') || problem.includes('eval')) {
+                    return "For security reasons, I can't evaluate that expression.";
+                }
+                
+                // Replace ^ with ** for exponentiation
+                const safeProblem = problem.replace(/\^/g, '**');
+                
+                // Use Function constructor instead of eval for slightly better security
+                const result = new Function(`return ${safeProblem}`)();
+                
+                return `The solution to <code>${problem}</code> is <strong>${result}</strong>.
+                <div class="action-buttons">
+                    <button class="action-btn primary-action" onclick="explainMathSolution('${problem.replace(/'/g, "\\'")}')">
+                        <i class="fas fa-question-circle"></i> Explain the steps
+                    </button>
+                </div>`;
+            } catch (e) {
+                return "I couldn't solve that math problem. Could you please rephrase it or provide more details?";
+            }
+        }
+
+        // Explain math solution (called from button click)
+        window.explainMathSolution = function(problem) {
+            const steps = generateMathExplanation(problem);
+            addAIMessage(steps, [
+                { text: "Solve another math problem", icon: "calculator" },
+                { text: "Explain more advanced math", icon: "square-root-alt" }
+            ]);
+        };
+
+        // Generate math explanation
+        function generateMathExplanation(problem) {
+            // This is a simplified explanation generator
+            return `Let me explain how to solve <code>${problem}</code> step by step:
+            
+            <ol>
+                <li><strong>Identify the operations:</strong> Look for parentheses, exponents, multiplication/division, and addition/subtraction (PEMDAS order)</li>
+                <li><strong>Solve parentheses first:</strong> Evaluate any expressions inside parentheses</li>
+                <li><strong>Handle exponents:</strong> Calculate any exponential terms</li>
+                <li><strong>Multiplication/division:</strong> Work from left to right</li>
+                <li><strong>Addition/subtraction:</strong> Finally, perform these operations</li>
+            </ol>
+            
+            <p>For <code>${problem}</code>, the calculation would proceed as follows:</p>
+            <pre>${problem} = ... [step-by-step working] ... = ${new Function(`return ${problem.replace(/\^/g, '**')}`)()}</pre>
+            
+            <p>Remember to always follow the correct order of operations!</p>`;
+        }
+
+        // Generate creative content
+        function generateCreativeContent(prompt) {
+            const lowerPrompt = prompt.toLowerCase();
+            
+            if (lowerPrompt.includes('story') || lowerPrompt.includes('tale')) {
+                return `Here's a short story based on your request:
+                
+                <h4>The Mysterious Key</h4>
+                <p>Emma found the old brass key while cleaning out her grandmother's attic. It was small, ornate, and strangely warm to the touch. The moment her fingers closed around it, she heard a faint whispering sound...</p>
+                <p>The key seemed to pulse in her hand, as if alive. She turned it over and noticed tiny engravings that formed a map when viewed in the right light. A map to where? Emma wasn't sure, but she knew one thing - this key was meant for her.</p>
+                <p>That night, the key began to glow...</p>
+                
+                <div class="action-buttons">
+                    <button class="action-btn primary-action" onclick="continueStory()">
+                        <i class="fas fa-book"></i> Continue the story
+                    </button>
+                    <button class="action-btn secondary-action" onclick="changeStoryGenre()">
+                        <i class="fas fa-exchange-alt"></i> Change genre
+                    </button>
+                </div>`;
+            }
+            
+            if (lowerPrompt.includes('poem') || lowerPrompt.includes('verse')) {
+                return `Here's a poem for you:
+                
+                <h4>Whispers of the Wind</h4>
+                <p>The wind does sing through autumn trees,<br>
+                A melody that floats with ease.<br>
+                It carries tales of days gone by,<br>
+                And secrets whispered to the sky.</p>
+                
+                <p>The leaves dance to its gentle tune,<br>
+                Beneath the pale and watchful moon.<br>
+                A symphony of nature's art,<br>
+                That stirs the soul and warms the heart.</p>`;
+            }
+            
+            return `I'd be happy to help with creative writing! Could you specify what you're looking for? 
+            For example:
+            <ul>
+                <li>A short story about a magical key</li>
+                <li>A poem about nature</li>
+                <li>A character description for a fantasy novel</li>
+                <li>A marketing slogan for a tech product</li>
+            </ul>`;
+        }
+
+        // Continue story (called from button click)
+        window.continueStory = function() {
+            addAIMessage(`<h4>The Mysterious Key - Continued</h4>
+            <p>Emma followed the glowing key's light to an old wardrobe in the corner of the attic. As she approached, the wardrobe doors creaked open on their own, revealing not the expected coats and mothballs, but a swirling portal of shimmering light.</p>
+            <p>The whispers grew louder, now forming words: "Come home, child." Emma hesitated only a moment before stepping through...</p>
+            
+            <div class="action-buttons">
+                <button class="action-btn primary-action" onclick="continueStory()">
+                    <i class="fas fa-book"></i> Continue
+                </button>
+                <button class="action-btn secondary-action" onclick="endStory()">
+                    <i class="fas fa-flag-checkered"></i> End story
+                </button>
+            </div>`);
+        };
+
+        // End story (called from button click)
+        window.endStory = function() {
+            addAIMessage(`<h4>The Mysterious Key - Conclusion</h4>
+            <p>Emma found herself in a lush, magical forest where time seemed to stand still. The key transformed into a pendant around her neck, and she suddenly remembered - this was where her grandmother had grown up, in a hidden realm accessible only to those with the key.</p>
+            <p>She had finally come home.</p>
+            
+            <p>Would you like to explore another creative writing prompt?</p>`);
+        };
+
+        // Change story genre (called from button click)
+        window.changeStoryGenre = function() {
+            addAIMessage(`What genre would you prefer for your story?
+            <div class="ai-tools">
+                <button class="ai-tool" data-prompt="Write a sci-fi story">
+                    <i class="fas fa-rocket"></i> Sci-Fi
+                </button>
+                <button class="ai-tool" data-prompt="Write a romance story">
+                    <i class="fas fa-heart"></i> Romance
+                </button>
+                <button class="ai-tool" data-prompt="Write a mystery story">
+                    <i class="fas fa-search"></i> Mystery
+                </button>
+                <button class="ai-tool" data-prompt="Write a fantasy story">
+                    <i class="fas fa-dragon"></i> Fantasy
+                </button>
+            </div>`);
+        };
+
+        // Get appropriate tools for AI response
+        function getResponseTools(response, userMessage) {
+            const lowerMsg = userMessage.toLowerCase();
+            
+            if (lowerMsg.includes('quantum') || lowerMsg.includes('physics')) {
+                return [
+                    { text: "Explain quantum superposition", icon: "atom" },
+                    { text: "What are quantum algorithms?", icon: "code" },
+                    { text: "Compare to classical computing", icon: "laptop-code" }
+                ];
+            }
+            
+            if (lowerMsg.includes('python') || lowerMsg.includes('code')) {
+                return [
+                    { text: "Show me another Python example", icon: "code" },
+                    { text: "Explain Python classes", icon: "cube" },
+                    { text: "How to handle errors in Python?", icon: "bug" }
+                ];
+            }
+            
+            if (lowerMsg.includes('machine learning') || lowerMsg.includes('ml')) {
+                return [
+                    { text: "Explain neural networks", icon: "project-diagram" },
+                    { text: "Show me a ML code example", icon: "code" },
+                    { text: "What's deep learning?", icon: "brain" }
+                ];
+            }
+            
+            if (lowerMsg.includes('math') || lowerMsg.includes('solve') || lowerMsg.includes('calculate')) {
+                return [
+                    { text: "Solve another math problem", icon: "calculator" },
+                    { text: "Explain algebra basics", icon: "square-root-alt" },
+                    { text: "Help with calculus", icon: "infinity" }
+                ];
+            }
+            
+            if (lowerMsg.includes('story') || lowerMsg.includes('poem') || lowerMsg.includes('creative')) {
+                return [
+                    { text: "Write another story", icon: "book" },
+                    { text: "Create a poem", icon: "pen-fancy" },
+                    { text: "Generate character ideas", icon: "user-astronaut" }
+                ];
+            }
+            
+            // Default tools
+            return [
+                { text: "Explain quantum computing", icon: "atom" },
+                { text: "Show me a Python example", icon: "code" },
+                { text: "Help with machine learning", icon: "brain" },
+                { text: "Solve a math problem", icon: "calculator" }
+            ];
+        }
+
+        // Send message
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message) {
+                addUserMessage(message);
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+                
+                // Simulate AI response
+                simulateAIResponse(message);
+            }
+        }
+
+        // Toggle dark mode
+        function toggleDarkMode() {
+            body.classList.toggle('dark-mode');
+            const isDark = body.classList.contains('dark-mode');
+            themeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+            localStorage.setItem('darkMode', isDark);
+        }
+
+        // Start new chat
+        function startNewChat() {
+            if (confirm("Start a new chat? Your current conversation will be cleared.")) {
+                chatMessages.innerHTML = '';
+                conversationMemory = [];
+                currentContext = "general";
+                addAIMessage(getWelcomeMessage(), getWelcomeTools());
+            }
+        }
+
+        // Save conversation to localStorage
+        function saveConversation() {
+            localStorage.setItem('aiChatConversation', JSON.stringify(conversationMemory));
+            localStorage.setItem('aiChatContext', currentContext);
+        }
+
+        // Load conversation from localStorage
+        function loadConversation() {
+            const savedConversation = localStorage.getItem('aiChatConversation');
+            const savedContext = localStorage.getItem('aiChatContext');
+            
+            if (savedConversation) {
+                conversationMemory = JSON.parse(savedConversation);
+                currentContext = savedContext || "general";
+                
+                // Rebuild chat from memory (simplified version)
+                if (conversationMemory.length > 1) {
+                    chatMessages.innerHTML = '';
+                    conversationMemory.forEach(msg => {
+                        if (msg.type === 'user') {
+                            addUserMessage(msg.content);
+                        } else {
+                            // For simplicity, we'll just show the last AI message
+                            if (msg === conversationMemory[conversationMemory.length - 1]) {
+                                addAIMessage(msg.content);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            body.classList.add('dark-mode');
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        }
+
+        // Initialize the chat
+        initChat();
+    </script>
+</body>
+</html>

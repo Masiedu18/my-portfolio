@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Converter - Asiedu Messiah</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .converter {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        select, input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        #result {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Unit Converter</h1>
+    <div class="converter">
+        <select id="conversionType">
+            <option value="length">Length (Meters ↔ Feet)</option>
+            <option value="weight">Weight (Kilograms ↔ Pounds)</option>
+            <option value="temperature">Temperature (°C ↔ °F)</option>
+        </select>
+        
+        <input type="number" id="inputValue" placeholder="Enter value">
+        
+        <div>
+            <label>From:</label>
+            <select id="fromUnit"></select>
+        </div>
+        
+        <div>
+            <label>To:</label>
+            <select id="toUnit"></select>
+        </div>
+        
+        <button onclick="convert()">Convert</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const units = {
+            length: { meters: 'Meters', feet: 'Feet' },
+            weight: { kg: 'Kilograms', lbs: 'Pounds' },
+            temperature: { celsius: 'Celsius', fahrenheit: 'Fahrenheit' }
+        };
+
+        function updateUnits() {
+            const type = document.getElementById('conversionType').value;
+            const fromUnit = document.getElementById('fromUnit');
+            const toUnit = document.getElementById('toUnit');
+            
+            fromUnit.innerHTML = '';
+            toUnit.innerHTML = '';
+            
+            for (const unit in units[type]) {
+                fromUnit.innerHTML += `<option value="${unit}">${units[type][unit]}</option>`;
+                toUnit.innerHTML += `<option value="${unit}">${units[type][unit]}</option>`;
+            }
+            
+            // Set default "to" unit to the second option
+            if (Object.keys(units[type]).length > 1) {
+                toUnit.selectedIndex = 1;
+            }
+        }
+
+        function convert() {
+            const type = document.getElementById('conversionType').value;
+            const value = parseFloat(document.getElementById('inputValue').value);
+            const from = document.getElementById('fromUnit').value;
+            const to = document.getElementById('toUnit').value;
+            
+            let result;
+            
+            if (type === 'length') {
+                if (from === 'meters' && to === 'feet') result = value * 3.28084;
+                else if (from === 'feet' && to === 'meters') result = value / 3.28084;
+                else result = value;
+            } 
+            else if (type === 'weight') {
+                if (from === 'kg' && to === 'lbs') result = value * 2.20462;
+                else if (from === 'lbs' && to === 'kg') result = value / 2.20462;
+                else result = value;
+            } 
+            else if (type === 'temperature') {
+                if (from === 'celsius' && to === 'fahrenheit') result = (value * 9/5) + 32;
+                else if (from === 'fahrenheit' && to === 'celsius') result = (value - 32) * 5/9;
+                else result = value;
+            }
+            
+            document.getElementById('result').innerHTML = 
+                `${value} ${units[type][from]} = ${result.toFixed(2)} ${units[type][to]}`;
+        }
+
+        // Initialize units on page load
+        document.getElementById('conversionType').addEventListener('change', updateUnits);
+        updateUnits();
+    </script>
+</body>
+</html>

@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Contacts App | Asiedu Messiah</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --danger: #f72585;
+            --danger-dark: #e5177b;
+            --success: #4cc9f0;
+            --gray: #6c757d;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --border-radius: 0.5rem;
+            --box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .search-container {
+            position: relative;
+            flex-grow: 1;
+            max-width: 300px;
+        }
+        
+        .search-container i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+        
+        .search-input {
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: var(--danger-dark);
+        }
+        
+        .btn-edit {
+            background: var(--gray);
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background: #5a6268;
+        }
+        
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            width: 100%;
+            max-width: 500px;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            box-shadow: 0 0 0 1px #ddd;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+        
+        thead {
+            background: var(--primary);
+            color: white;
+        }
+        
+        th, td {
+            padding: 1rem;
+            text-align: left;
+        }
+        
+        th {
+            font-weight: 600;
+        }
+        
+        tbody tr {
+            border-bottom: 1px solid #ddd;
+        }
+        
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+        
+        tbody tr:hover {
+            background: rgba(67, 97, 238, 0.05);
+        }
+        
+        .actions-cell {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #ddd;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1100;
+        }
+        
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .toast-success {
+            background: #2ecc71;
+        }
+        
+        .toast-error {
+            background: var(--danger);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            th, td {
+                padding: 0.75rem;
+            }
+            
+            .actions-cell {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .app-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-container {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-address-book"></i> Contacts Manager</h1>
+        
+        <div class="app-header">
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" id="search" class="search-input" placeholder="Search contacts...">
+            </div>
+            <button id="add-contact-btn" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Contact
+            </button>
+        </div>
+        
+        <table id="contacts-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="contacts-list">
+                <!-- Contacts will be loaded here -->
+            </tbody>
+        </table>
+        
+        <div id="empty-state" class="empty-state">
+            <i class="fas fa-address-book"></i>
+            <h3>No Contacts Found</h3>
+            <p>Add your first contact by clicking the "Add Contact" button</p>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Contact Modal -->
+    <div id="contact-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Add New Contact</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="contact-form">
+                <input type="hidden" id="contact-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" id="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone" class="form-label">Phone</label>
+                        <input type="tel" id="phone" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" id="email" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="address" class="form-label">Address</label>
+                    <textarea id="address" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="cancel-btn" class="btn btn-edit">Cancel</button>
+                    <button type="submit" id="save-btn" class="btn btn-primary">Save Contact</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Confirm Deletion</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <p>Are you sure you want to delete this contact? This action cannot be undone.</p>
+            <div class="form-actions">
+                <button type="button" id="cancel-delete-btn" class="btn btn-edit">Cancel</button>
+                <button type="button" id="confirm-delete-btn" class="btn btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const addContactBtn = document.getElementById('add-contact-btn');
+            const contactModal = document.getElementById('contact-modal');
+            const confirmModal = document.getElementById('confirm-modal');
+            const contactForm = document.getElementById('contact-form');
+            const contactsTable = document.getElementById('contacts-list');
+            const searchInput = document.getElementById('search');
+            const emptyState = document.getElementById('empty-state');
+            const toast = document.getElementById('toast');
+            
+            // Modal buttons
+            const closeBtns = document.querySelectorAll('.close-btn, #cancel-btn');
+            const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+            const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+            
+            // Form fields
+            const contactId = document.getElementById('contact-id');
+            const nameInput = document.getElementById('name');
+            const phoneInput = document.getElementById('phone');
+            const emailInput = document.getElementById('email');
+            const addressInput = document.getElementById('address');
+            
+            // State variables
+            let contacts = JSON.parse(localStorage.getItem('contacts')) || [];
+            let contactToDelete = null;
+            let isEditing = false;
+            
+            // Initialize the app
+            renderContacts(contacts);
+            toggleEmptyState();
+            
+            // Event Listeners
+            addContactBtn.addEventListener('click', openAddContactModal);
+            
+            closeBtns.forEach(btn => {
+                btn.addEventListener('click', closeModal);
+            });
+            
+            contactForm.addEventListener('submit', handleFormSubmit);
+            
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const filteredContacts = contacts.filter(contact => 
+                    contact.name.toLowerCase().includes(searchTerm) ||
+                    contact.phone.toLowerCase().includes(searchTerm) ||
+                    contact.email.toLowerCase().includes(searchTerm)
+                );
+                renderContacts(filteredContacts);
+            });
+            
+            cancelDeleteBtn.addEventListener('click', function() {
+                contactToDelete = null;
+                confirmModal.style.display = 'none';
+            });
+            
+            confirmDeleteBtn.addEventListener('click', function() {
+                if (contactToDelete !== null) {
+                    deleteContact(contactToDelete);
+                    contactToDelete = null;
+                    confirmModal.style.display = 'none';
+                }
+            });
+            
+            // Functions
+            function openAddContactModal() {
+                isEditing = false;
+                document.getElementById('modal-title').textContent = 'Add New Contact';
+                contactForm.reset();
+                contactId.value = '';
+                contactModal.style.display = 'flex';
+                nameInput.focus();
+            }
+            
+            function openEditContactModal(id) {
+                const contact = contacts.find(c => c.id === id);
+                if (contact) {
+                    isEditing = true;
+                    document.getElementById('modal-title').textContent = 'Edit Contact';
+                    contactId.value = contact.id;
+                    nameInput.value = contact.name;
+                    phoneInput.value = contact.phone;
+                    emailInput.value = contact.email;
+                    addressInput.value = contact.address || '';
+                    contactModal.style.display = 'flex';
+                    nameInput.focus();
+                }
+            }
+            
+            function closeModal() {
+                contactModal.style.display = 'none';
+                confirmModal.style.display = 'none';
+            }
+            
+            function handleFormSubmit(e) {
+                e.preventDefault();
+                
+                const contact = {
+                    id: isEditing ? contactId.value : Date.now().toString(),
+                    name: nameInput.value.trim(),
+                    phone: phoneInput.value.trim(),
+                    email: emailInput.value.trim(),
+                    address: addressInput.value.trim()
+                };
+                
+                if (isEditing) {
+                    updateContact(contact);
+                } else {
+                    addContact(contact);
+                }
+                
+                closeModal();
+            }
+            
+            function addContact(contact) {
+                contacts.unshift(contact);
+                saveContacts();
+                renderContacts(contacts);
+                showToast('Contact added successfully!', 'success');
+            }
+            
+            function updateContact(updatedContact) {
+                contacts = contacts.map(contact => 
+                    contact.id === updatedContact.id ? updatedContact : contact
+                );
+                saveContacts();
+                renderContacts(contacts);
+                showToast('Contact updated successfully!', 'success');
+            }
+            
+            function promptDeleteContact(id) {
+                contactToDelete = id;
+                confirmModal.style.display = 'flex';
+            }
+            
+            function deleteContact(id) {
+                contacts = contacts.filter(contact => contact.id !== id);
+                saveContacts();
+                renderContacts(contacts);
+                showToast('Contact deleted successfully!', 'success');
+            }
+            
+            function saveContacts() {
+                localStorage.setItem('contacts', JSON.stringify(contacts));
+                toggleEmptyState();
+            }
+            
+            function renderContacts(contactsToRender) {
+                contactsTable.innerHTML = '';
+                
+                if (contactsToRender.length === 0) {
+                    toggleEmptyState(true);
+                    return;
+                }
+                
+                toggleEmptyState(false);
+                
+                contactsToRender.forEach(contact => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${contact.name}</td>
+                        <td>${contact.phone}</td>
+                        <td>${contact.email}</td>
+                        <td class="actions-cell">
+                            <button onclick="openEditContactModal('${contact.id}')" class="btn btn-edit btn-sm">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button onclick="promptDeleteContact('${contact.id}')" class="btn btn-danger btn-sm">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                        </td>
+                    `;
+                    contactsTable.appendChild(row);
+                });
+            }
+            
+            function toggleEmptyState(show = contacts.length === 0) {
+                emptyState.style.display = show ? 'block' : 'none';
+                document.getElementById('contacts-table').style.display = show ? 'none' : 'table';
+            }
+            
+            function showToast(message, type = 'success') {
+                toast.textContent = message;
+                toast.className = `toast show toast-${type}`;
+                
+                setTimeout(() => {
+                    toast.className = 'toast';
+                }, 3000);
+            }
+            
+            // Make functions available globally for inline event handlers
+            window.openEditContactModal = openEditContactModal;
+            window.promptDeleteContact = promptDeleteContact;
+        });
+    </script>
+</body>
+</html>

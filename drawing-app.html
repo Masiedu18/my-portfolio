@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Drawing App | Asiedu Messiah</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --dark: #1b263b;
+            --light: #f8f9fa;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --info: #560bad;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            touch-action: none;
+        }
+        
+        h1 {
+            color: var(--dark);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .app-container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .toolbar {
+            margin: 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .tool-section {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin: 0 5px;
+            padding: 8px 12px;
+            background: rgba(67, 97, 238, 0.1);
+            border-radius: 8px;
+        }
+        
+        button {
+            padding: 8px 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        button.active {
+            background: var(--dark);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        #save {
+            background: var(--success);
+        }
+        
+        #clear {
+            background: var(--danger);
+        }
+        
+        #insert-image {
+            background: var(--info);
+        }
+        
+        #undo, #redo {
+            background: var(--warning);
+        }
+        
+        canvas {
+            border: 2px solid var(--dark);
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            cursor: crosshair;
+            width: 100%;
+            touch-action: none;
+        }
+        
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .image-input {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: rgba(67, 97, 238, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+        
+        .shape-options {
+            display: flex;
+            gap: 8px;
+            background: rgba(67, 97, 238, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-top: 0;
+        }
+        
+        .tool-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        
+        input[type="range"] {
+            width: 100px;
+            height: 6px;
+            background: #ddd;
+            border-radius: 3px;
+        }
+        
+        .color-options {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .color-swatch {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .color-swatch.active {
+            transform: scale(1.2);
+            box-shadow: 0 0 0 2px var(--dark);
+        }
+        
+        .zoom-controls {
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 10;
+        }
+        
+        .brush-preview {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+        
+        @media (max-width: 768px) {
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .tool-section {
+                justify-content: space-between;
+            }
+            
+            .image-input {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <h1>Modern Drawing App <i class="fas fa-paint-brush"></i></h1>
+        
+        <div class="toolbar">
+            <div class="tool-section">
+                <button id="draw-mode" class="active"><i class="fas fa-pencil-alt"></i> Draw</button>
+                <button id="shape-mode"><i class="fas fa-shapes"></i> Shapes</button>
+                <button id="text-mode"><i class="fas fa-font"></i> Text</button>
+                <button id="eraser-mode"><i class="fas fa-eraser"></i> Eraser</button>
+            </div>
+            
+            <div class="tool-options">
+                <div class="tool-section" id="shape-options">
+                    <button id="rect-btn" title="Rectangle"><i class="far fa-square"></i></button>
+                    <button id="circle-btn" title="Circle"><i class="far fa-circle"></i></button>
+                    <button id="line-btn" title="Line"><i class="fas fa-slash"></i></button>
+                    <button id="triangle-btn" title="Triangle"><i class="fas fa-play"></i></button>
+                </div>
+                
+                <div class="tool-section">
+                    <div class="brush-preview" id="brush-preview">5</div>
+                    <input type="range" id="brush-size" min="1" max="50" value="5">
+                </div>
+                
+                <div class="tool-section color-options">
+                    <input type="color" id="color-picker" value="#000000" title="Custom Color">
+                    <div class="color-swatch active" style="background: #000000;" data-color="#000000"></div>
+                    <div class="color-swatch" style="background: #ff0000;" data-color="#ff0000"></div>
+                    <div class="color-swatch" style="background: #00ff00;" data-color="#00ff00"></div>
+                    <div class="color-swatch" style="background: #0000ff;" data-color="#0000ff"></div>
+                    <div class="color-swatch" style="background: #ffff00;" data-color="#ffff00"></div>
+                    <div class="color-swatch" style="background: #ff00ff;" data-color="#ff00ff"></div>
+                </div>
+                
+                <div class="tool-section">
+                    <button id="fill-shape" title="Fill Shape"><i class="fas fa-fill-drip"></i> Fill</button>
+                    <label for="fill-toggle">
+                        <input type="checkbox" id="fill-toggle" style="margin-left: 5px;">
+                    </label>
+                </div>
+            </div>
+            
+            <div class="tool-section">
+                <button id="undo" title="Undo"><i class="fas fa-undo"></i></button>
+                <button id="redo" title="Redo"><i class="fas fa-redo"></i></button>
+                <button id="clear" title="Clear Canvas"><i class="fas fa-trash"></i> Clear</button>
+                <button id="save" title="Save Drawing"><i class="fas fa-download"></i> Save</button>
+                <button id="insert-image" title="Insert Image"><i class="far fa-image"></i> Image</button>
+            </div>
+            
+            <div class="image-input" id="image-input" style="display: none; width: 100%;">
+                <input type="text" id="image-url" placeholder="Paste image URL or upload file">
+                <input type="file" id="image-upload" accept="image/*" style="display: none;">
+                <button id="upload-image"><i class="fas fa-upload"></i> Upload</button>
+                <button id="add-image"><i class="fas fa-plus"></i> Add</button>
+            </div>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="drawing-canvas" width="800" height="600"></canvas>
+            <div class="zoom-controls">
+                <button id="zoom-in" title="Zoom In"><i class="fas fa-search-plus"></i></button>
+                <button id="zoom-out" title="Zoom Out"><i class="fas fa-search-minus"></i></button>
+                <button id="zoom-reset" title="Reset Zoom"><i class="fas fa-expand"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('drawing-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas size to match displayed size
+        function resizeCanvas() {
+            const displayWidth = Math.min(canvas.clientWidth, 1200);
+            const displayHeight = Math.min(canvas.clientHeight, 800);
+            
+            if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                tempCtx.drawImage(canvas, 0, 0);
+                
+                canvas.width = displayWidth;
+                canvas.height = displayHeight;
+                
+                ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, canvas.width, canvas.height);
+            }
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
+        // UI Elements
+        const clearBtn = document.getElementById('clear');
+        const saveBtn = document.getElementById('save');
+        const colorPicker = document.getElementById('color-picker');
+        const brushSize = document.getElementById('brush-size');
+        const brushPreview = document.getElementById('brush-preview');
+        const drawModeBtn = document.getElementById('draw-mode');
+        const shapeModeBtn = document.getElementById('shape-mode');
+        const textModeBtn = document.getElementById('text-mode');
+        const eraserModeBtn = document.getElementById('eraser-mode');
+        const shapeOptions = document.getElementById('shape-options');
+        const rectBtn = document.getElementById('rect-btn');
+        const circleBtn = document.getElementById('circle-btn');
+        const lineBtn = document.getElementById('line-btn');
+        const triangleBtn = document.getElementById('triangle-btn');
+        const insertImageBtn = document.getElementById('insert-image');
+        const imageInput = document.getElementById('image-input');
+        const imageUrl = document.getElementById('image-url');
+        const imageUpload = document.getElementById('image-upload');
+        const uploadImageBtn = document.getElementById('upload-image');
+        const addImageBtn = document.getElementById('add-image');
+        const undoBtn = document.getElementById('undo');
+        const redoBtn = document.getElementById('redo');
+        const fillShapeBtn = document.getElementById('fill-shape');
+        const fillToggle = document.getElementById('fill-toggle');
+        const zoomInBtn = document.getElementById('zoom-in');
+        const zoomOutBtn = document.getElementById('zoom-out');
+        const zoomResetBtn = document.getElementById('zoom-reset');
+        const colorSwatches = document.querySelectorAll('.color-swatch');
+        
+        // Drawing state
+        let isDrawing = false;
+        let currentMode = 'draw';
+        let startX, startY;
+        let currentColor = '#000000';
+        let currentSize = 5;
+        let shouldFill = false;
+        let zoomLevel = 1;
+        let offsetX = 0;
+        let offsetY = 0;
+        let isPlacingText = false;
+        let textPosition = { x: 0, y: 0 };
+        
+        // History for undo/redo
+        let drawingHistory = [];
+        let historyIndex = -1;
+        
+        // Current drawing path for freehand
+        let currentPath = [];
+        
+        // Set initial styles
+        ctx.strokeStyle = currentColor;
+        ctx.fillStyle = currentColor;
+        ctx.lineWidth = currentSize;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.font = '16px Arial';
+        
+        // Update brush preview
+        function updateBrushPreview() {
+            brushPreview.textContent = currentSize;
+            brushPreview.style.width = `${currentSize + 20}px`;
+            brushPreview.style.height = `${currentSize + 20}px`;
+            brushPreview.style.backgroundColor = currentColor;
+            brushPreview.style.color = getContrastColor(currentColor);
+        }
+        
+        // Get contrast color for brush preview text
+        function getContrastColor(hexColor) {
+            const r = parseInt(hexColor.substr(1, 2), 16);
+            const g = parseInt(hexColor.substr(3, 2), 16);
+            const b = parseInt(hexColor.substr(5, 2), 16);
+            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+            return brightness > 128 ? '#000000' : '#ffffff';
+        }
+        
+        updateBrushPreview();
+        
+        // Get canvas coordinates accounting for zoom and offset
+        function getCanvasCoordinates(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+            
+            return {
+                x: (x - offsetX) / zoomLevel,
+                y: (y - offsetY) / zoomLevel
+            };
+        }
+        
+        // Drawing functions
+        canvas.addEventListener('mousedown', startAction);
+        canvas.addEventListener('mousemove', performAction);
+        canvas.addEventListener('mouseup', endAction);
+        canvas.addEventListener('mouseout', endAction);
+        canvas.addEventListener('click', handleCanvasClick);
+        
+        // Touch events for mobile
+        canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+        canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+        canvas.addEventListener('touchend', handleTouchEnd);
+        
+        function handleTouchStart(e) {
+            e.preventDefault();
+            if (e.touches.length === 1) {
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousedown', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                startAction(mouseEvent);
+            }
+        }
+        
+        function handleTouchMove(e) {
+            e.preventDefault();
+            if (e.touches.length === 1) {
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousemove', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                performAction(mouseEvent);
+            }
+        }
+        
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            const mouseEvent = new MouseEvent('mouseup', {});
+            endAction(mouseEvent);
+        }
+        
+        function handleCanvasClick(e) {
+            if (currentMode === 'text' && isPlacingText) {
+                const coords = getCanvasCoordinates(e);
+                textPosition = { x: coords.x, y: coords.y };
+                
+                const text = prompt('Enter your text:', 'Sample Text');
+                if (text) {
+                    ctx.fillStyle = currentColor;
+                    ctx.font = `${currentSize * 3}px Arial`;
+                    ctx.fillText(text, textPosition.x, textPosition.y);
+                    saveDrawingState();
+                }
+                isPlacingText = false;
+            }
+        }
+        
+        function startAction(e) {
+            if (currentMode === 'text') return;
+            
+            const coords = getCanvasCoordinates(e);
+            startX = coords.x;
+            startY = coords.y;
+            
+            if (currentMode === 'draw' || currentMode === 'eraser') {
+                isDrawing = true;
+                currentPath = [{ x: startX, y: startY }];
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                
+                if (currentMode === 'draw') {
+                    ctx.strokeStyle = currentColor;
+                } else {
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.globalCompositeOperation = 'destination-out';
+                }
+                ctx.lineWidth = currentSize;
+            } else if (currentMode !== 'text') {
+                isDrawing = true;
+            }
+            
+            saveDrawingState();
+        }
+        
+        function performAction(e) {
+            if (currentMode === 'text') return;
+            
+            const coords = getCanvasCoordinates(e);
+            const x = coords.x;
+            const y = coords.y;
+            
+            if (!isDrawing) return;
+            
+            if (currentMode === 'draw' || currentMode === 'eraser') {
+                currentPath.push({ x, y });
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            } else if (currentMode !== 'text') {
+                redrawCanvas();
+                drawShapePreview(x, y);
+            }
+        }
+        
+        function endAction(e) {
+            if (currentMode === 'text') return;
+            if (!isDrawing) return;
+            
+            const coords = getCanvasCoordinates(e);
+            const x = coords.x;
+            const y = coords.y;
+            
+            if (currentMode === 'draw' || currentMode === 'eraser') {
+                saveDrawingState();
+                ctx.globalCompositeOperation = 'source-over';
+            } else if (currentMode !== 'text') {
+                redrawCanvas();
+                drawFinalShape(x, y);
+                saveDrawingState();
+            }
+            
+            isDrawing = false;
+        }
+        
+        function drawShapePreview(x, y) {
+            ctx.save();
+            ctx.strokeStyle = currentMode === 'eraser' ? '#ffffff' : currentColor;
+            ctx.fillStyle = currentMode === 'eraser' ? '#ffffff' : currentColor + '80';
+            ctx.lineWidth = currentSize;
+            
+            switch(currentMode) {
+                case 'rectangle':
+                    drawRectangle(startX, startY, x - startX, y - startY, false);
+                    break;
+                case 'circle':
+                    drawCircle(startX, startY, x, y, false);
+                    break;
+                case 'line':
+                    drawLine(startX, startY, x, y);
+                    break;
+                case 'triangle':
+                    drawTriangle(startX, startY, x, y, false);
+                    break;
+            }
+            
+            ctx.restore();
+        }
+        
+        function drawFinalShape(x, y) {
+            ctx.save();
+            ctx.strokeStyle = currentMode === 'eraser' ? '#ffffff' : currentColor;
+            ctx.fillStyle = currentMode === 'eraser' ? '#ffffff' : currentColor;
+            ctx.lineWidth = currentSize;
+            
+            switch(currentMode) {
+                case 'rectangle':
+                    drawRectangle(startX, startY, x - startX, y - startY, shouldFill);
+                    break;
+                case 'circle':
+                    drawCircle(startX, startY, x, y, shouldFill);
+                    break;
+                case 'line':
+                    drawLine(startX, startY, x, y);
+                    break;
+                case 'triangle':
+                    drawTriangle(startX, startY, x, y, shouldFill);
+                    break;
+            }
+            
+            ctx.restore();
+        }
+        
+        function drawRectangle(x, y, width, height, fill) {
+            ctx.beginPath();
+            ctx.rect(x, y, width, height);
+            if (fill) {
+                ctx.fill();
+            }
+            ctx.stroke();
+        }
+        
+        function drawCircle(x1, y1, x2, y2, fill) {
+            const radius = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+            ctx.beginPath();
+            ctx.arc(x1, y1, radius, 0, Math.PI * 2);
+            if (fill) {
+                ctx.fill();
+            }
+            ctx.stroke();
+        }
+        
+        function drawLine(x1, y1, x2, y2) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+        }
+        
+        function drawTriangle(x1, y1, x2, y2, fill) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.lineTo(x1 * 2 - x2, y2);
+            ctx.closePath();
+            if (fill) {
+                ctx.fill();
+            }
+            ctx.stroke();
+        }
+        
+        // Save canvas state to history
+        function saveDrawingState() {
+            if (historyIndex < drawingHistory.length - 1) {
+                drawingHistory = drawingHistory.slice(0, historyIndex + 1);
+            }
+            
+            const canvasData = canvas.toDataURL();
+            drawingHistory.push(canvasData);
+            historyIndex++;
+            
+            updateUndoRedoButtons();
+        }
+        
+        function updateUndoRedoButtons() {
+            undoBtn.disabled = historyIndex <= 0;
+            redoBtn.disabled = historyIndex >= drawingHistory.length - 1;
+        }
+        
+        function redrawCanvas() {
+            if (drawingHistory.length === 0 || historyIndex < 0) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
+            
+            const img = new Image();
+            img.onload = function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            };
+            img.src = drawingHistory[historyIndex];
+        }
+        
+        // Controls
+        clearBtn.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawingHistory = [];
+            historyIndex = -1;
+            saveDrawingState();
+        });
+        
+        saveBtn.addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = `drawing-${new Date().toISOString().slice(0, 10)}.png`;
+            link.href = canvas.toDataURL('image/png');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+        
+        // Mode switching
+        function setActiveMode(mode) {
+            currentMode = mode;
+            
+            drawModeBtn.classList.remove('active');
+            shapeModeBtn.classList.remove('active');
+            textModeBtn.classList.remove('active');
+            eraserModeBtn.classList.remove('active');
+            
+            shapeOptions.style.display = 'none';
+            
+            switch(mode) {
+                case 'draw':
+                    drawModeBtn.classList.add('active');
+                    canvas.style.cursor = 'crosshair';
+                    isPlacingText = false;
+                    break;
+                case 'rectangle':
+                case 'circle':
+                case 'line':
+                case 'triangle':
+                    shapeModeBtn.classList.add('active');
+                    shapeOptions.style.display = 'flex';
+                    canvas.style.cursor = 'crosshair';
+                    isPlacingText = false;
+                    break;
+                case 'text':
+                    textModeBtn.classList.add('active');
+                    canvas.style.cursor = 'text';
+                    isPlacingText = true;
+                    break;
+                case 'eraser':
+                    eraserModeBtn.classList.add('active');
+                    canvas.style.cursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="${currentSize}" height="${currentSize}" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="white" stroke="black" stroke-width="1"/></svg>') ${currentSize/2} ${currentSize/2}, auto`;
+                    isPlacingText = false;
+                    break;
+            }
+        }
+        
+        drawModeBtn.addEventListener('click', () => setActiveMode('draw'));
+        eraserModeBtn.addEventListener('click', () => setActiveMode('eraser'));
+        textModeBtn.addEventListener('click', () => setActiveMode('text'));
+        shapeModeBtn.addEventListener('click', () => setActiveMode('rectangle'));
+        
+        // Shape selection
+        rectBtn.addEventListener('click', () => setActiveMode('rectangle'));
+        circleBtn.addEventListener('click', () => setActiveMode('circle'));
+        lineBtn.addEventListener('click', () => setActiveMode('line'));
+        triangleBtn.addEventListener('click', () => setActiveMode('triangle'));
+        
+        // Color picker
+        colorPicker.addEventListener('input', (e) => {
+            currentColor = e.target.value;
+            ctx.strokeStyle = currentColor;
+            ctx.fillStyle = currentColor;
+            updateBrushPreview();
+        });
+        
+        // Color swatches
+        colorSwatches.forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                colorSwatches.forEach(s => s.classList.remove('active'));
+                swatch.classList.add('active');
+                currentColor = swatch.dataset.color;
+                colorPicker.value = currentColor;
+                ctx.strokeStyle = currentColor;
+                ctx.fillStyle = currentColor;
+                updateBrushPreview();
+            });
+        });
+        
+        // Brush size
+        brushSize.addEventListener('input', (e) => {
+            currentSize = e.target.value;
+            ctx.lineWidth = currentSize;
+            updateBrushPreview();
+            
+            if (currentMode === 'eraser') {
+                canvas.style.cursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="${currentSize}" height="${currentSize}" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="white" stroke="black" stroke-width="1"/></svg>') ${currentSize/2} ${currentSize/2}, auto`;
+            }
+        });
+        
+        // Fill toggle
+        fillToggle.addEventListener('change', (e) => {
+            shouldFill = e.target.checked;
+        });
+        
+        // Image insertion
+        insertImageBtn.addEventListener('click', () => {
+            imageInput.style.display = imageInput.style.display === 'none' ? 'flex' : 'none';
+        });
+        
+        uploadImageBtn.addEventListener('click', () => {
+            imageUpload.click();
+        });
+        
+        imageUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    imageUrl.value = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        addImageBtn.addEventListener('click', () => {
+            const url = imageUrl.value.trim();
+            if (url) {
+                const img = new Image();
+                img.onload = function() {
+                    ctx.drawImage(img, 50, 50, img.width > 300 ? 300 : img.width, img.width > 300 ? img.height * (300 / img.width) : img.height);
+                    saveDrawingState();
+                    imageUrl.value = '';
+                    imageInput.style.display = 'none';
+                };
+                img.onerror = function() {
+                    alert('Could not load the image. Please check the URL and try again.');
+                };
+                img.src = url;
+            } else {
+                alert('Please enter a valid image URL or upload a file');
+            }
+        });
+        
+        // Undo/redo functionality
+        undoBtn.addEventListener('click', () => {
+            if (historyIndex > 0) {
+                historyIndex--;
+                redrawCanvas();
+                updateUndoRedoButtons();
+            }
+        });
+        
+        redoBtn.addEventListener('click', () => {
+            if (historyIndex < drawingHistory.length - 1) {
+                historyIndex++;
+                redrawCanvas();
+                updateUndoRedoButtons();
+            }
+        });
+        
+        // Zoom functionality
+        zoomInBtn.addEventListener('click', () => {
+            zoomLevel = Math.min(zoomLevel * 1.2, 4);
+            applyZoom();
+        });
+        
+        zoomOutBtn.addEventListener('click', () => {
+            zoomLevel = Math.max(zoomLevel / 1.2, 0.5);
+            applyZoom();
+        });
+        
+        zoomResetBtn.addEventListener('click', () => {
+            zoomLevel = 1;
+            offsetX = 0;
+            offsetY = 0;
+            applyZoom();
+        });
+        
+        function applyZoom() {
+            canvas.style.transform = `scale(${zoomLevel})`;
+            canvas.style.transformOrigin = '0 0';
+        }
+        
+        // Initialize with empty canvas state
+        saveDrawingState();
+    </script>
+</body>
+</html>
